@@ -9,6 +9,8 @@ const App = () => {
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [filteredContent, setFilteredContent] = useState("");
+  const [notification, setNotification] = useState(false);
+  const [notificationMsg, setNotificationMsg] = useState("hello");
 
   useEffect(() => {
     personService.getAll().then((initialPersons) => setPersons(initialPersons));
@@ -25,9 +27,14 @@ const App = () => {
         number: newNumber,
         date: new Date().toISOString(),
       };
-      personService
-        .create(personObject)
-        .then((returnedPerson) => setPersons([...persons, personObject]));
+      personService.create(personObject).then((returnedPerson) => {
+        setPersons([...persons, personObject]);
+        setNotification(true);
+        setNotificationMsg(`${personObject.name} has been added`);
+        setTimeout(() => {
+          setNotification(false);
+        }, 2000);
+      });
       setNewNumber("");
       setNewName("");
       setFilteredContent("");
@@ -49,8 +56,23 @@ const App = () => {
             setPersons(
               persons.map((person) => (person.id === res.id ? res : person))
             );
+            setNotification(true);
+            setNotificationMsg(
+              `The number for ${foundPerson.name} has been updated to ${newNumber}`
+            );
+            setTimeout(() => {
+              setNotification(false);
+            }, 2000);
           })
-          .catch((error) => console.log(error));
+          .catch((error) => {
+            setNotificationMsg(
+              `${foundPerson.name} was already removed from the phonebook`
+            );
+            setNotification(true);
+            setTimeout(() => {
+              setNotification(false);
+            }, 2000);
+          });
 
         setNewNumber("");
         setNewName("");
@@ -74,13 +96,27 @@ const App = () => {
   };
 
   const handleDelete = (person) => {
-    personService.destroy(person.id).then((res) => {
-      setPersons(persons.filter((p) => p.id !== person.id));
-    });
+    personService
+      .destroy(person.id)
+      .then((res) => {
+        setPersons(persons.filter((p) => p.id !== person.id));
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  const notificationStyles = {
+    backgroundColor: "aqua",
+    color: "black",
+    padding: "1em",
+    margin: "0 auto",
+    textAlign: "center",
   };
 
   return (
     <div>
+      {notification && <h1 style={notificationStyles}>{notificationMsg}</h1>}
       <h2>Phonebook</h2>
       <Filter handleFilteredContent={handleFilteredContent} />
       <PersonForm
