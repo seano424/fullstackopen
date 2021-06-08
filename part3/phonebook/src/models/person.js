@@ -3,7 +3,7 @@ require('dotenv').config()
 
 const mongoose = require('mongoose')
 // eslint-disable-next-line no-undef
-const url = process.env.MONGODB_URI
+const url = process.env.NODE_ENV === 'test' ? process.env.TEST_MONGODB_URI : process.env.MONGODB_URI
 console.log('Connecting to ', url)
 
 mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true })
