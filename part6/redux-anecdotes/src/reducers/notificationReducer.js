@@ -1,7 +1,14 @@
-export const createNotification = (message) => {
-  return {
-    type: 'SET_NOTIFICATION',
-    data: message,
+export const createNotification = (message, delay) => {
+  return async (dispatch) => {
+    dispatch({
+      type: 'SET_NOTIFICATION',
+      data: {
+        message,
+        delay: setTimeout(() => {
+          dispatch(deleteNotification())
+        }, delay * 1000),
+      },
+    })
   }
 }
 
@@ -14,7 +21,8 @@ export const deleteNotification = () => {
 const reducer = (state = '', action) => {
   switch (action.type) {
     case 'SET_NOTIFICATION':
-      return action.data
+      clearTimeout(state.delay)
+      return action.data.message
     case 'DELETE_NOTIFICATION':
       return ''
     default:
